@@ -11,3 +11,11 @@ commands to run  for python :-
 
     also in fast api - even if all the function  is synchrnonpous and there is no  use of async anywhere it 
     will still be synchronous as it runs on starlet
+
+5. While coding in python in fast api we need a bunch of things  to be imported 
+    before going to use thenm 
+    from typing import Optional , List 
+    from enum import IntEnum
+    from pydantic import BaseModel , Field
+    learn the importance of these things from chatgpt if  you forget 
+    

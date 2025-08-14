@@ -1,9 +1,33 @@
-#first importing fast api
+#first importing   the things we need the most 
 from fastapi import FastAPI
-from typing import Optional
+from typing import Optional , List 
+from enum import IntEnum
+from pydantic import BaseModel , Field
 
 #we are going to create an app using fast api
 app = FastAPI()
+
+#after defining the application app()
+#we need to define the schema
+
+
+#using enum  i will set the priority  - which we are going to use as a  part of todo
+class Priority (IntEnum):
+    LOW  = 3 
+    MEDIUM = 2
+    HIGH = 1
+
+#using pydantic to create a schema to define the functionality - its is done using pydantic space model
+
+class TodoBase(BaseModel):
+    '''
+    the thing about description is - it is majorly about documentation
+    but if it comes to be integrated with open ai model then the model will see this as the context
+    '''
+    todo_name : str = Field(..., min_length=3 , max_length=512 , description = "Name of the todo")
+    todo_description : str = Field(..., min_length=5 , description = "Description of the todo")
+    #so the priority of the todo is the instance of the class Priority
+    todo_priority : Priority  = Field(default =  Priority.LOW , description ='')
 
 
 
@@ -108,6 +132,23 @@ def add_todo(todo:dict):
 
 
 
-
-
 #update endpoint - put 
+@app.put("/todos/{todo_id}")
+def update_todo(todo_id:int, updated_todo:dict):
+    for todo in all_todos:
+        if todo['todo_id'] == todo_id:
+            todo["todo_name"] = updated_todo['todo_name']
+            todo['todo_description'] = updated_todo['todo_description']
+            return todo
+        
+    return "error,todo not found"
+
+
+#delete endpoint  - using delete
+@app.delete("/todos/{todo_id}")
+def delet_todo(todo_id:int):
+    for index , todo in enumerate(all_todos):
+        if todo['todo_id'] == todo_id:
+            todo_deleted = all_todos.pop(index)
+            return todo_deleted
+    return "todo not found ! so we cant delete anything " 
