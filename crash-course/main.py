@@ -53,7 +53,8 @@ async def get_data_fromdb():
 #to get a single todo 
 #using path parameters - #localhost:9999/todos/2
 @app.get("/todo/{todo_id}")
-def get_todo(todo_id):
+def get_todo(todo_id:int):
+    print("running")
     for todo in all_todos:
         if todo["todo_id"] == todo_id:
             return {"todo":todo}
@@ -72,3 +73,41 @@ def get_todos(first_n:Optional[int] = 0):
         return {"please input something valid under 1-5"}
     
 
+
+#post endpoint
+
+#endpoint to add todo
+@app.post("/todos")
+def add_todo(todo:dict):
+    # first we get the ids lst
+
+    ##simpler approach - 
+    id = []
+    for todo in all_todos:
+        id.append(todo['todo_id'])
+
+    #now since we have the list of all the todo_id we can find the max in them and then we can add 1 and asssign it as the new todo id
+    new_todo_id = max(id)+1
+
+
+    #better approach to  build the new todo - as for bigger data set this approach will fall out
+
+    #“For every todo in the list all_todos, give me the value of its 'todo_id' key.”
+    new_todo_id_better_approach = max(todo['todo_id'] for todo in all_todos) + 1
+
+    #creating new todo 
+    new_todo ={
+        "todo_id": new_todo_id_better_approach,
+        "todo_name": todo["todo_name"],
+        "todo_description": todo["todo_description"]
+    }
+
+
+    all_todos.append(new_todo)
+    return new_todo
+
+
+
+
+
+#update endpoint - put 
