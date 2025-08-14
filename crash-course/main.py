@@ -27,18 +27,45 @@ class TodoBase(BaseModel):
     todo_name : str = Field(..., min_length=3 , max_length=512 , description = "Name of the todo")
     todo_description : str = Field(..., min_length=5 , description = "Description of the todo")
     #so the priority of the todo is the instance of the class Priority
-    todo_priority : Priority  = Field(default =  Priority.LOW , description ='')
+    todo_priority : Priority  = Field(default =  Priority.LOW , description = "Priority of the todo")
+
+
+
+#creating a model for creating a todo - different models for different end points
+class TodoCreate(TodoBase):
+    pass
+
+
+'''
+#creating a type of the TODO - since i am inherinting  the todobase class here the Todo will have the propperty of Todo_name and Todo_description - and so 
+#if i want to set the response type to be Todo classs then it will havbe alll the threee property 
+'''
+class Todo(TodoBase):
+    todo_id : int = Field(..., description = "unique ID of the todo") #this is going to be used for creating a todo
+
+
+
+
+
+#class(schema) for updating the Todo - why i am making it from BaseModel beacuse its going to be like the todo base but its going to be optional for a bunch for a bunch of fields
+class TodoUpdate(BaseModel ):
+    todo_name : Optional[str] = Field(None, min_length=3 , max_length=512 , description = "Name of the todo")
+    todo_description :  Optional[str] = Field(None, min_length=5 , description = "Description of the todo")
+    #so the priority of the todo is the instance of the class Priority
+    todo_priority : Optional[Priority]  = Field(None , description = "Priority of the todo")
+
 
 
 
 #lets create a in memory database - list of dictionries 
 all_todos = [
-    {'todo_id': 1, 'todo_name': 'Sports', 'todo_description': 'Go to the gym'},
-    {'todo_id': 2, 'todo_name': 'Read', 'todo_description': 'Read 10 pages'},
-    {'todo_id': 3, 'todo_name': 'Shop', 'todo_description': 'Go shopping'},
-    {'todo_id': 4, 'todo_name': 'Study', 'todo_description': 'Study for exam'},
-    {'todo_id': 5, 'todo_name': 'Meditate', 'todo_description': 'Meditate 20 minutes'}
+    Todo(todo_id=1, todo_name="Clean house", todo_description="Cleaning the house thoroughly", priority=Priority.HIGH),
+    Todo(todo_id=2, todo_name="Sports", todo_description="Going to the gym for workout", priority=Priority.MEDIUM),
+    Todo(todo_id=3, todo_name="Read", todo_description="Read chapter 5 of the book", priority=Priority.LOW),
+    Todo(todo_id=4, todo_name="Work", todo_description="Complete project documentation", priority=Priority.MEDIUM),
+    Todo(todo_id=5, todo_name="Study", todo_description="Prepare for upcoming exam", priority=Priority.LOW)
 ]
+
 
 
 
@@ -46,20 +73,6 @@ all_todos = [
 #GET , PUT , POST , DELETE
 
 #creating a get endpoint 
-
-@app.get("/")
-def index():
-    return {"message":"hello"}
-
-#so we can apparently define asynchronous and synchronous endpoints here
-
-
-##let  see the example of the synchronous thing which is bound to take the cpu time
-@app.get("/calculation")
-def calculation():
-    pass
-    return ""
-
 #asynchronous function which will anyhow do a job that will take time - for eg getting data from database
 @app.get("/data")
 async def get_data_fromdb():
@@ -76,12 +89,12 @@ async def get_data_fromdb():
 
 #to get a single todo 
 #using path parameters - #localhost:9999/todos/2
-@app.get("/todo/{todo_id}")
+@app.get("/todo/{todo_id}" , response_model=Todo)
 def get_todo(todo_id:int):
     print("running")
     for todo in all_todos:
-        if todo["todo_id"] == todo_id:
-            return {"todo":todo}
+        if todo.todo_id == todo_id:
+            return todo
 
 
 #using query parameter
