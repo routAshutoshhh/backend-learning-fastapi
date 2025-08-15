@@ -1,4 +1,5 @@
 #first importing   the things we need the most 
+
 from fastapi import FastAPI
 from typing import Optional , List 
 from enum import IntEnum
@@ -24,10 +25,10 @@ class TodoBase(BaseModel):
     the thing about description is - it is majorly about documentation
     but if it comes to be integrated with open ai model then the model will see this as the context
     '''
-    todo_name : str = Field(..., min_length=3 , max_length=512 , description = "Name of the todo")
-    todo_description : str = Field(..., min_length=5 , description = "Description of the todo")
+    todo_name : str|None  = Field(..., min_length=3 , max_length=512 , description = "Name of the todo")
+    todo_description : str|None = Field(..., min_length=5 , description = "Description of the todo")
     #so the priority of the todo is the instance of the class Priority
-    todo_priority : Priority  = Field(default =  Priority.LOW , description = "Priority of the todo")
+    todo_priority : Priority|None  = Field(default =  Priority.LOW , description = "Priority of the todo")
 
 
 
@@ -48,22 +49,22 @@ class Todo(TodoBase):
 
 
 #class(schema) for updating the Todo - why i am making it from BaseModel beacuse its going to be like the todo base but its going to be optional for a bunch for a bunch of fields
-class TodoUpdate(BaseModel ):
-    todo_name : Optional[str] = Field(None, min_length=3 , max_length=512 , description = "Name of the todo")
-    todo_description :  Optional[str] = Field(None, min_length=5 , description = "Description of the todo")
+class TodoUpdate(BaseModel):
+    todo_name : Optional[str] = Field(default = None, min_length=3 , max_length=512 , description = "Name of the todo")
+    todo_description :  Optional[str] = Field(default = None, min_length=5 , description = "Description of the todo")
     #so the priority of the todo is the instance of the class Priority
-    todo_priority : Optional[Priority]  = Field(None , description = "Priority of the todo")
+    todo_priority : Optional[Priority]  = Field(default = None, description = "Priority of the todo")
 
 
 
 
 #lets create a in memory database - list of dictionries 
 all_todos = [
-    Todo(todo_id=1, todo_name="Clean house", todo_description="Cleaning the house thoroughly", priority=Priority.HIGH),
-    Todo(todo_id=2, todo_name="Sports", todo_description="Going to the gym for workout", priority=Priority.MEDIUM),
-    Todo(todo_id=3, todo_name="Read", todo_description="Read chapter 5 of the book", priority=Priority.LOW),
-    Todo(todo_id=4, todo_name="Work", todo_description="Complete project documentation", priority=Priority.MEDIUM),
-    Todo(todo_id=5, todo_name="Study", todo_description="Prepare for upcoming exam", priority=Priority.LOW)
+    Todo(todo_id=1, todo_name="Clean house", todo_description="Cleaning the house thoroughly", todo_priority=Priority.HIGH),
+    Todo(todo_id=2, todo_name="Sports", todo_description="Going to the gym for workout", todo_priority=Priority.MEDIUM),
+    Todo(todo_id=3, todo_name="Read", todo_description="Read chapter 5 of the book", todo_priority=Priority.LOW),
+    Todo(todo_id=4, todo_name="Work", todo_description="Complete project documentation", todo_priority=Priority.MEDIUM),
+    Todo(todo_id=5, todo_name="Study", todo_description="Prepare for upcoming exam", todo_priority=Priority.LOW)
 ]
 
 
@@ -99,7 +100,7 @@ def get_todo(todo_id:int):
 
 #using query parameter
 #localhost:9999/todos?first_n=3 - to build this we dont give it in the url but we give it in the function 
-@app.get('/todos')
+@app.get('/todos' , response_model = List[Todo])#using list that we have imported we are going to get a collection of todos data type
 def get_todos(first_n:Optional[int] = 0):
     if first_n is None:
         return all_todos
@@ -114,30 +115,40 @@ def get_todos(first_n:Optional[int] = 0):
 #post endpoint
 
 #endpoint to add todo
-@app.post("/todos")
-def add_todo(todo:dict):
+'''
+here  we are passing todo that is of a type of todocreate because todoCreate is inheriting all the properties of TodoBase class - we can  use that but since we are assigning the todo_id her only 
+and to make the code more modular we are doing so ! - as from todoBase will also work because it does not have todoId which we are creating on my own while creating todo
+'''
+@app.post("/todos" , response_model = Todo)
+def add_todo(todo:TodoCreate):
     # first we get the ids lst
 
-    ##simpler approach - 
-    id = []
-    for todo in all_todos:
-        id.append(todo['todo_id'])
+    """
+        ##simpler approach - 
+        id = []
+        for todo in all_todos:
+            id.append(todo['todo_id'])
 
-    #now since we have the list of all the todo_id we can find the max in them and then we can add 1 and asssign it as the new todo id
-    new_todo_id = max(id)+1
+        #now since we have the list of all the todo_id we can find the max in them and then we can add 1 and asssign it as the new todo id
+        new_todo_id = max(id)+1
+
+
+    """
 
 
     #better approach to  build the new todo - as for bigger data set this approach will fall out
 
     #“For every todo in the list all_todos, give me the value of its 'todo_id' key.”
-    new_todo_id_better_approach = max(todo['todo_id'] for todo in all_todos) + 1
+    new_todo_id_better_approach = max(todo.todo_id for todo in all_todos) + 1
 
     #creating new todo 
-    new_todo ={
-        "todo_id": new_todo_id_better_approach,
-        "todo_name": todo["todo_name"],
-        "todo_description": todo["todo_description"]
-    }
+    # we have to create the objcect of the class todo
+    new_todo = Todo(
+        todo_id = new_todo_id_better_approach,
+        todo_name = todo.todo_name,
+        todo_description = todo.todo_description,
+        todo_priority = todo.todo_priority
+    )
 
 
     all_todos.append(new_todo)
@@ -146,22 +157,23 @@ def add_todo(todo:dict):
 
 
 #update endpoint - put 
-@app.put("/todos/{todo_id}")
-def update_todo(todo_id:int, updated_todo:dict):
+@app.put("/todos/{todo_id}" , response_model= Todo)
+def update_todo(todo_id:int, updated_todo:TodoUpdate):
     for todo in all_todos:
-        if todo['todo_id'] == todo_id:
-            todo["todo_name"] = updated_todo['todo_name']
-            todo['todo_description'] = updated_todo['todo_description']
+        if todo.todo_id == todo_id:
+            todo.todo_name = updated_todo.todo_name
+            todo.todo_description = updated_todo.todo_description
+            todo.todo_priority = updated_todo.todo_priority
             return todo
         
     return "error,todo not found"
 
 
 #delete endpoint  - using delete
-@app.delete("/todos/{todo_id}")
-def delet_todo(todo_id:int):
+@app.delete("/todos/{todo_id}" , response_model = Todo)
+def delet_todo(todo_id:int , todo : Todo ):
     for index , todo in enumerate(all_todos):
-        if todo['todo_id'] == todo_id:
+        if todo.todo_id  == todo_id:
             todo_deleted = all_todos.pop(index)
             return todo_deleted
     return "todo not found ! so we cant delete anything " 
