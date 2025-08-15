@@ -121,8 +121,7 @@ and to make the code more modular we are doing so ! - as from todoBase will also
 '''
 @app.post("/todos" , response_model = Todo)
 def add_todo(todo:TodoCreate):
-    # first we get the ids lst
-
+    # first we get the ids list
     """
         ##simpler approach - 
         id = []
@@ -131,8 +130,6 @@ def add_todo(todo:TodoCreate):
 
         #now since we have the list of all the todo_id we can find the max in them and then we can add 1 and asssign it as the new todo id
         new_todo_id = max(id)+1
-
-
     """
 
 
