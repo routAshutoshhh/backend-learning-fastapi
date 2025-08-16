@@ -1,6 +1,6 @@
 #first importing   the things we need the most 
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from typing import Optional , List 
 from enum import IntEnum
 from pydantic import BaseModel , Field
@@ -163,14 +163,14 @@ def update_todo(todo_id:int, updated_todo:TodoUpdate):
             todo.todo_priority = updated_todo.todo_priority
             return todo
         
-    return "error,todo not found"
+    raise HTTPException(status_code = 404 , detail="Todo not found" )
 
 
 #delete endpoint  - using delete
 @app.delete("/todos/{todo_id}" , response_model = Todo)
-def delet_todo(todo_id:int , todo : Todo ):
+def delete_todo(todo_id:int , todo : Todo ):
     for index , todo in enumerate(all_todos):
         if todo.todo_id  == todo_id:
             todo_deleted = all_todos.pop(index)
             return todo_deleted
-    return "todo not found ! so we cant delete anything " 
+    raise HTTPException(status_code = 404 , detail = "Todo , not found cant delete this!")
