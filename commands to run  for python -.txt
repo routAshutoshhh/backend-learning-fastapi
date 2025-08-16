@@ -1,0 +1,9 @@
+commands to run  for python :-
+1. upgrading pip :python.exe -m pip install --upgrade pip
+2. starting the virtual environment :  
+	step1 : python -m venv nameofenvironment(python -m venv env)
+	step2: env\Scripts\activate
+	step3: to deactivate the virtual environment : deactivate
+3. installing any package : pip install package-name 
+
+    

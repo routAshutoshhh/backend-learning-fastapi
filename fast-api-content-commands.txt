@@ -1,0 +1,82 @@
+youtube video for best practices - https://www.youtube.com/watch?v=H9Blu0kWdZE
+example set up for this  is in the best-practice-fastapi folder ! check that for understanding
+
+1. make an env using : python -m venv env
+2. activate the virtual environment
+3. make a requirement.txt  file  and requirements-dev.tsx
+4.crreate a "src" folder  where our main.py file will be there
+4. install everything from the requirements-dev.txt file using command - pip install -r requirements-dev.txt
+5. Import everything that we require
+6. running a fast api server using uvicorn : 
+    step1: pip install "uvicorn[standard]"
+    step2: uvicorn main:app --reload --port 9999
+
+    also in fast api - even if all the function  is synchrnonpous and there is no  use of async anywhere it 
+    will still be synchronous as it runs on starlet
+7. While coding in python in fast api we need a bunch of things  to be imported 
+    before going to use thenm 
+    from typing import Optional , List 
+    from enum import IntEnum
+    from pydantic import BaseModel , Field
+    learn the importance of these things from chatgpt if  you forget 
+
+8. create the application app= fastapi()
+9 make the bindings with #Base.metadata.create_all(bind=engine)
+but - 
+keeep it commented  as the tests will fail if not connected - only uncomment to create  new table 
+10. create a logging.py file to see all the logs 
+     read about creating logging file from here - https://medium.com/@v0220225/backend-logging-in-python-and-applied-to-fastapi-7b47118d1d92
+11. create a rate limitting file - rate_limiting.py in the src folder using slowapi by importing limitera and slowapi.util importing get_remote_address - protecting DDOS or bot attack 
+12. to call everything in our project we create a file named = __init__.py for calling and better structure
+
+#creating the folder to handle different things
+
+13. Create folder named " entities" with files - __init__.py  , todo.py , user.py - cerasting the relationship - todo and user are the two entities 
+14. createa folder called "database" with file of - __init__.py , core.py and also in the root directory create a .env file - import the db url from the .dotenv with the core
+15. create a folder named "auth" in src - then in the auth - make the files
+        15.1 __init__.auth.py
+        15.2. controller.auth.py
+        15.3. services.auth.py
+        15.4. model.auth.py 
+
+16. create a folder named "todo. top handle its servicesand other thingfs liike db managment and function 
+
+    it will also have the same file 
+        16.1 __init__.todo.py
+        16.2. controller.todo.py
+        16.3. services.todo.py
+        16.4. model.todo.py 
+17 . Creating the same for the "user"  - creating folder 
+        17.3. services.user.py
+        17.4. model.user.py 
+        17.1 __init__.user.py
+        17.2. controller.user.py
+
+
+18. creating an exception file in the src folder - exceptions.py
+     there you will add all the exceptions to use
+
+19. creating an api  file in the src folder - api.py
+     there you will add all the API ROUTES there to use
+
+     -  ## in the best practice example folder we have the example code for the bettter understanding
+
+20. create a tests folder in the main / root directory - we can euither do unit testing or we can do end to end testing 
+
+    ###this is sort of unit testing
+    create these files there - 1. __init__.py
+                               2.conftest.py
+                               3.test_users_service.py
+                               4.test_auth_service.py
+                               5.test_todos_service.py
+
+    ####to do the end to end testing
+    create a folder e2e where you can write the code 
+        1. test_auth_endpoints.py
+        2. test_todos_endpoints.py
+        3. test_users_endpoints.py
+
+    also you can deploy this on docker
+    in  the source directory - create two files - Dockerfile
+                                                  docker_compose.yml
+
